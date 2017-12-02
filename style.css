@@ -1,27 +1,60 @@
 * {
     margin: 0;
     padding: 0;
-}
-
-#hello {
-    display: flex;
-    flex-direction: row;
+    
+    font-family: "Roboto", Helvetica, sans-serif;
 }
 
 #sidebar {
-    height: 100%;
-    display: inline-flex;
-    flex: 0 0 320px;
+    position: absolute;
+    width: 320px;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#logo {
+    width: 100%;
+    background: #3f51b5;
+    padding: 16px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#logo h1 {
+    color: white;
+    font-weight: 500;
 }
 
 #container {
-    display: inline-flex;
-    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
     width: calc(100% - 320px);
 }
 
-#equation {
+.row {
     width: 100%;
-    background: red;
-    height: 84px;
+    border-left: #3f51b5 6px solid;
+    border-right: #3f51b5 6px solid;
+    border-bottom: #3f51b5 6px solid;
+    box-sizing: border-box;
+    padding: 12px;
+}
+
+#new-row-button {
+    background: #3f51b5;
+    height: 42px;
+    vertical-align: middle;
+    line-height: 36px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 500;
+}
+
+#new-row-button:hover {
+    background: #283593;
 }

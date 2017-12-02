@@ -1,20 +1,20 @@
-var line, mesh;
+var lines = [], mesh;
 var camera, controls, scene, renderer;
 init();
 render();
 function init() {
 	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 0xcccccc );
-	scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+	scene.background = new THREE.Color(0xcccccc);
+	scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth - 320, window.innerHeight );
 	var container = document.getElementById( 'container' );
 	container.appendChild( renderer.domElement );
-	camera = new THREE.PerspectiveCamera( 60, (window.innerWidth - 320) / window.innerHeight, 1, 1000 );
+	camera = new THREE.PerspectiveCamera(60, (window.innerWidth - 320) / window.innerHeight, 1, 1000);
 	camera.position.z = 10;
-	controls = new THREE.OrbitControls( camera, renderer.domElement );
-	controls.addEventListener( 'change', render ); // remove when using animation loop
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	controls.addEventListener('change', render); // remove when using animation loop
 	controls.enableZoom = false;
 	// world
 	var xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
@@ -68,8 +68,9 @@ function clean(latex) {
 				.replace("\\right", "");
 }
 
-var updateEquation = function(x_latex, y_latex, z_latex) {
-	scene.remove(line);
+var updateEquation = function(idx, x_latex, y_latex, z_latex) {
+	// scene.remove(line);
+	scene.remove(lines[idx]);
 	
 	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
 	
@@ -115,18 +116,15 @@ var updateEquation = function(x_latex, y_latex, z_latex) {
 		}
 	}
 	
-	line = new THREE.Line(geometry, material);
+	lines[idx] = new THREE.Line(geometry, material);
 	
-	scene.add(line);
+	scene.add(lines[idx]);
 	renderer.render(scene, camera);
 }
 
 var xInput = document.getElementById("x");
 var yInput = document.getElementById("y");
 var zInput = document.getElementById("z");
-// xInput.oninput = updateEquation;
-// yInput.oninput = updateEquation;
-// zInput.oninput = updateEquation;
 
 var latexSpan = document.getElementById('latex');
 
@@ -138,7 +136,7 @@ var xField = MQ.MathField(xInput, {
 			var x = xField.latex();
 			var y = yField.latex();
 			var z = zField.latex();
-			updateEquation(x, y, z);
+			updateEquation(0, x, y, z);
     	}
   	}
 });
@@ -150,7 +148,7 @@ var yField = MQ.MathField(yInput, {
 			var x = xField.latex();
 			var y = yField.latex();
 			var z = zField.latex();
-			updateEquation(x, y, z);
+			updateEquation(0, x, y, z);
     	}
   	}
 });
@@ -162,7 +160,7 @@ var zField = MQ.MathField(zInput, {
 			var x = xField.latex();
 			var y = yField.latex();
 			var z = zField.latex();
-			updateEquation(x, y, z);
+			updateEquation(0, x, y, z);
     	}
   	}
 });
