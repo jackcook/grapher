@@ -226,6 +226,7 @@ var eqnField = MQ.MathField(document.getElementById("eq"), {
 				var x = 5 * (u - 0.5);
 				var z = 5 * (v - 0.5);
 				var y = Math.pow(x, 2) + Math.pow(z, 2);
+				// var y = Math.pow(z, 2) - Math.pow(x, 2);
 	            return new THREE.Vector3(x, y, z);
 	        }
 			
