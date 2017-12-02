@@ -223,18 +223,13 @@ var eqnField = MQ.MathField(document.getElementById("eq"), {
 	handlers: {
 		edit: function() {
 			function radialWave(u, v) {
-	            var r = 50;
-	            var x = Math.sin(u) * r;
-	            var z = Math.sin(v / 2) * 2 * r;
-	            var y = (Math.sin(u * 4 * Math.PI) + Math.cos(v * 2 * Math.PI)) * 2.8;
-	            return new THREE.Vector3(x, Math.pow(v, 2), z);
+				var x = 5 * (u - 0.5);
+				var z = 5 * (v - 0.5);
+				var y = Math.pow(x, 2) + Math.pow(z, 2);
+	            return new THREE.Vector3(x, y, z);
 	        }
 			
 			function createMesh(geom) {
-	            geom.applyMatrix(new THREE.Matrix4().makeTranslation(-25, 0, -25));
-	            // assign two materials
-	//            var meshMaterial = new THREE.MeshLambertMaterial({color: 0xff5555});
-	            //var meshMaterial = new THREE.MeshNormalMaterial();
 	            var meshMaterial = new THREE.MeshPhongMaterial({
 	                specular: 0xaaaafff,
 	                color: 0x3399ff,
@@ -249,28 +244,6 @@ var eqnField = MQ.MathField(document.getElementById("eq"), {
 		
 		var mesh = createMesh(new THREE.ParametricGeometry(radialWave, 120, 120, false));
         scene.add(mesh);
-			
-			// scene.remove(mesh);
-			// 
-			// var material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
-			// 
-			// for (var y = -5; y <= 5; y += 0.01) {
-			// 	// var xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
-			// 	// var xGeometry = new THREE.Geometry();
-			// 	// xGeometry.vertices.push(new THREE.Vector3(-1000, 0, 0));
-			// 	// xGeometry.vertices.push(new THREE.Vector3(1000, 0, 0));
-			// 	// var xLine = new THREE.Line(xGeometry, xMaterial);
-			// 	// scene.add(xLine);
-			// 	
-			// 	var geometry = new THREE.Geometry();
-			// 	
-			// 	for (var x = -5; x <= 5; x += 0.01) {
-			// 		geometry.vertices.push(new THREE.Vector3(x, Math.pow(x, 2), y));
-			// 	}
-			// 	
-			// 	var line = new THREE.Line(geometry, material);
-			// 	scene.add(line);
-			// }
 		}
 	}
 });
