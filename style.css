@@ -19,3 +19,9 @@
     height: 100%;
     width: calc(100% - 320px);
 }
+
+#equation {
+    width: 100%;
+    background: red;
+    height: 84px;
+}

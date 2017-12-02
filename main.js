@@ -1,4 +1,5 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+var line;
 var camera, controls, scene, renderer;
 init();
 render(); // remove when using next line for animation loop (requestAnimationFrame)
@@ -38,30 +39,30 @@ function init() {
 // var sphere = new THREE.Mesh( geometry, material );
 // scene.add( sphere );
 
-	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
-	
-	function x(i) {
-		return Math.cos(i);
-	}
-	
-	function y(i) {
-		return Math.sin(i);
-	}
-	
-	function z(i) {
-		return i;
-	}
-
-	var geometry = new THREE.Geometry();
-	
-	var factor = 15;
-	for (var i = -1000; i < 1000; i++) {
-		geometry.vertices.push(new THREE.Vector3(x(i / 10) * factor, z(i / 10) * factor, y(i / 10) * factor));
-	}
-	
-	var line = new THREE.Line(geometry, material);
-	
-	scene.add(line);
+	// var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+	// 
+	// function x(t) {
+	// 	return eval(document.getElementById("x").value);
+	// }
+	// 
+	// function y(t) {
+	// 	return eval(document.getElementById("y").value);
+	// }
+	// 
+	// function z(t) {
+	// 	return eval(document.getElementById("z").value);
+	// }
+	// 
+	// var geometry = new THREE.Geometry();
+	// 
+	// var factor = 15;
+	// for (var i = -1000; i < 1000; i++) {
+	// 	geometry.vertices.push(new THREE.Vector3(x(i / 10) * factor, z(i / 10) * factor, y(i / 10) * factor));
+	// }
+	// 
+	// var line = new THREE.Line(geometry, material);
+	// 
+	// scene.add(line);
 	renderer.render(scene, camera);
 	
 	// lights
@@ -89,3 +90,103 @@ function animate() {
 function render() {
 	renderer.render( scene, camera );
 }
+
+function clean(latex) {
+	return latex.replace("\\sin", "sin")
+				.replace("\\cos", "cos")
+				.replace("\\left", "")
+				.replace("\\right", "");
+}
+
+var updateEquation = function(x_latex, y_latex, z_latex) {
+	scene.remove(line);
+	
+	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+	
+	function x(t) {
+		try {
+			return Evaluatex.evaluate(clean(x_latex), {t: t}, {latex: true});
+		} catch(err) {
+			return null;
+		}
+	}
+	
+	function y(t) {
+		try {
+ 			return Evaluatex.evaluate(clean(y_latex), {t: t}, {latex: true});
+ 		} catch(err) {
+ 			return null;
+ 		}
+	}
+	
+	function z(t) {
+		try {
+			return Evaluatex.evaluate(clean(z_latex), {t: t}, {latex: true});
+		} catch(err) {
+			return null;
+		}
+	}
+
+	var geometry = new THREE.Geometry();
+	
+	var factor = 15;
+	for (var i = -1000; i < 1000; i++) {
+		var x_val = x(i / 10), y_val = y(i / 10), z_val = z(i / 10);
+		if (x_val == null || y_val == null || z_val == null) {
+			break;
+		}
+		
+		geometry.vertices.push(new THREE.Vector3(x_val * factor, z_val * factor, y_val * factor));
+	}
+	
+	line = new THREE.Line(geometry, material);
+	
+	scene.add(line);
+	renderer.render(scene, camera);
+}
+
+var xInput = document.getElementById("x");
+var yInput = document.getElementById("y");
+var zInput = document.getElementById("z");
+// xInput.oninput = updateEquation;
+// yInput.oninput = updateEquation;
+// zInput.oninput = updateEquation;
+
+var latexSpan = document.getElementById('latex');
+
+var MQ = MathQuill.getInterface(2); // for backcompat
+var xField = MQ.MathField(xInput, {
+  	spaceBehavesLikeTab: true, // configurable
+  	handlers: {
+    	edit: function() { // useful event handlers
+			var x = xField.latex();
+			var y = yField.latex();
+			var z = zField.latex();
+			updateEquation(x, y, z);
+    	}
+  	}
+});
+
+var yField = MQ.MathField(yInput, {
+  	spaceBehavesLikeTab: true, // configurable
+  	handlers: {
+    	edit: function() { // useful event handlers
+			var x = xField.latex();
+			var y = yField.latex();
+			var z = zField.latex();
+			updateEquation(x, y, z);
+    	}
+  	}
+});
+
+var zField = MQ.MathField(zInput, {
+  	spaceBehavesLikeTab: true, // configurable
+  	handlers: {
+    	edit: function() { // useful event handlers
+			var x = xField.latex();
+			var y = yField.latex();
+			var z = zField.latex();
+			updateEquation(x, y, z);
+    	}
+  	}
+});
