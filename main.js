@@ -1,5 +1,5 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
-var line;
+var line, mesh;
 var camera, controls, scene, renderer;
 init();
 render(); // remove when using next line for animation loop (requestAnimationFrame)
@@ -14,7 +14,7 @@ function init() {
 	var container = document.getElementById( 'container' );
 	container.appendChild( renderer.domElement );
 	camera = new THREE.PerspectiveCamera( 60, (window.innerWidth - 320) / window.innerHeight, 1, 1000 );
-	camera.position.z = 500;
+	camera.position.z = 10;
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	controls.addEventListener( 'change', render ); // remove when using animation loop
 	// enable animation loop when using damping or autorotation
@@ -22,6 +22,27 @@ function init() {
 	//controls.dampingFactor = 0.25;
 	controls.enableZoom = false;
 	// world
+	var xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+	var xGeometry = new THREE.Geometry();
+	xGeometry.vertices.push(new THREE.Vector3(-1000, 0, 0));
+	xGeometry.vertices.push(new THREE.Vector3(1000, 0, 0));
+	var xLine = new THREE.Line(xGeometry, xMaterial);
+	scene.add(xLine);
+	
+	var yMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 });
+	var yGeometry = new THREE.Geometry();
+	yGeometry.vertices.push(new THREE.Vector3(0, -1000, 0));
+	yGeometry.vertices.push(new THREE.Vector3(0, 1000, 0));
+	var yLine = new THREE.Line(yGeometry, yMaterial);
+	scene.add(yLine);
+	
+	var zMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+	var zGeometry = new THREE.Geometry();
+	zGeometry.vertices.push(new THREE.Vector3(0, 0, -1000));
+	zGeometry.vertices.push(new THREE.Vector3(0, 0, 1000));
+	var zLine = new THREE.Line(zGeometry, zMaterial);
+	scene.add(zLine);
+	
 // 	var geometry = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
 // 	var material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
 // 	for ( var i = 0; i < 500; i ++ ) {
@@ -129,14 +150,20 @@ var updateEquation = function(x_latex, y_latex, z_latex) {
 
 	var geometry = new THREE.Geometry();
 	
-	var factor = 15;
-	for (var i = -1000; i < 1000; i++) {
-		var x_val = x(i / 10), y_val = y(i / 10), z_val = z(i / 10);
+	var tMax = 50;
+	var tMin = -50;
+	var increment = 10;
+	
+	for (var i = tMin * increment; i <= tMax * increment; i++) {
+		var x_val = x(i / increment), y_val = y(i / increment), z_val = z(i / increment);
+		
 		if (x_val == null || y_val == null || z_val == null) {
 			break;
 		}
 		
-		geometry.vertices.push(new THREE.Vector3(x_val * factor, z_val * factor, y_val * factor));
+		if (x_val < 5 && x_val > -5 && y_val < 5 && y_val > -5 && z_val < 5 && z_val > -5) {
+			geometry.vertices.push(new THREE.Vector3(x_val, z_val, y_val));
+		}
 	}
 	
 	line = new THREE.Line(geometry, material);
@@ -189,4 +216,61 @@ var zField = MQ.MathField(zInput, {
 			updateEquation(x, y, z);
     	}
   	}
+});
+
+var eqnField = MQ.MathField(document.getElementById("eq"), {
+	spaceBehavesLikeTab: true,
+	handlers: {
+		edit: function() {
+			function radialWave(u, v) {
+	            var r = 50;
+	            var x = Math.sin(u) * r;
+	            var z = Math.sin(v / 2) * 2 * r;
+	            var y = (Math.sin(u * 4 * Math.PI) + Math.cos(v * 2 * Math.PI)) * 2.8;
+	            return new THREE.Vector3(x, Math.pow(v, 2), z);
+	        }
+			
+			function createMesh(geom) {
+	            geom.applyMatrix(new THREE.Matrix4().makeTranslation(-25, 0, -25));
+	            // assign two materials
+	//            var meshMaterial = new THREE.MeshLambertMaterial({color: 0xff5555});
+	            //var meshMaterial = new THREE.MeshNormalMaterial();
+	            var meshMaterial = new THREE.MeshPhongMaterial({
+	                specular: 0xaaaafff,
+	                color: 0x3399ff,
+	                shininess: 40,
+	                metal: true
+	            });
+	            meshMaterial.side = THREE.DoubleSide;
+	            // create a multimaterial
+	            var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
+	            return plane;
+	        }
+		
+		var mesh = createMesh(new THREE.ParametricGeometry(radialWave, 120, 120, false));
+        scene.add(mesh);
+			
+			// scene.remove(mesh);
+			// 
+			// var material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+			// 
+			// for (var y = -5; y <= 5; y += 0.01) {
+			// 	// var xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+			// 	// var xGeometry = new THREE.Geometry();
+			// 	// xGeometry.vertices.push(new THREE.Vector3(-1000, 0, 0));
+			// 	// xGeometry.vertices.push(new THREE.Vector3(1000, 0, 0));
+			// 	// var xLine = new THREE.Line(xGeometry, xMaterial);
+			// 	// scene.add(xLine);
+			// 	
+			// 	var geometry = new THREE.Geometry();
+			// 	
+			// 	for (var x = -5; x <= 5; x += 0.01) {
+			// 		geometry.vertices.push(new THREE.Vector3(x, Math.pow(x, 2), y));
+			// 	}
+			// 	
+			// 	var line = new THREE.Line(geometry, material);
+			// 	scene.add(line);
+			// }
+		}
+	}
 });
