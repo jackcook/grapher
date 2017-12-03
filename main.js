@@ -17,7 +17,7 @@ function init() {
 	var container = document.getElementById( 'container' );
 	container.appendChild( renderer.domElement );
 	camera = new THREE.PerspectiveCamera(60, (window.innerWidth - 320) / window.innerHeight, 1, 1000);
-	camera.position.x = 5;
+	camera.position.x = -5;
 	camera.position.y = 2;
 	camera.position.z = 5;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -131,7 +131,7 @@ function createEquationRow() {
 	return $(`<div class="row equation">
 		<label>z = </label><span class="eqn"></span>
 		<img class="delete" src="close.svg" />
-		</div>`);
+	</div>`);
 }
 
 function createParametricRow() {
@@ -140,7 +140,14 @@ function createParametricRow() {
 		<label>y = </label><span class="y"></span><br>
 		<label>z = </label><span class="z"></span>
 		<img class="delete" src="close.svg" />
-		</div>`);
+	</div>`);
+}
+
+function createPointRow() {
+	return $(`<div class="row point">
+		<span class="coordinates">(0,0,0)</span>
+		<img class="delete" src="close.svg" />
+	</div>`)
 }
 
 function createRow(type) {
@@ -246,6 +253,57 @@ function createRow(type) {
 		};
 
 		$("." + id + " .delete").click(deleteHandler);
+	} else if (type == "point") {
+		var row = createPointRow();
+
+		var id = "p" + Math.floor(Math.random() * 1000000);
+		row.addClass(id);
+
+		row.insertBefore("#new-row-button");
+
+		var editHandler = function() {
+			scene.remove(items[id]);
+
+			var point_latex = clean(MQ.MathField($("." + id).find(".coordinates").get(0)).latex());
+			var point_regex = /\((-?\d*\.?\d+),(-?\d*\.?\d+),(-?\d*\.?\d+)\)/
+			var match = point_regex.exec(point_latex);
+
+			if (match != null && match.length == 4) {
+				match.shift();
+				var coordinates = match.map(Number);
+
+				var geometry = new THREE.SphereGeometry(0.1, 32, 32);
+				var material = new THREE.MeshPhongMaterial({
+					color: 0x3f51b5,
+					shininess: 4
+				});
+
+				items[id] = new THREE.Mesh(geometry, material);
+				items[id].position.set(match[0], match[2], match[1]);
+
+				scene.add(items[id]);
+			}
+
+			renderer.render(scene, camera);
+		};
+
+		var pointField = MQ.MathField($("." + id).find(".coordinates").get(0), {
+			spaceBehavesLikeTab: true,
+			handlers: {
+				edit: editHandler
+			}
+		});
+
+		editHandler();
+
+		var deleteHandler = function() {
+			$("." + id).remove();
+
+			scene.remove(items[id]);
+			renderer.render(scene, camera);
+		};
+
+		$("." + id + " .delete").click(deleteHandler);
 	}
 }
 
@@ -254,10 +312,11 @@ createRow("parametric", 0);
 $("#new-row-button").click(function(e) {
 	$("#new-dropdown").remove();
 
-	var dropdown = $("<div id=\"new-dropdown\">" +
-        "<p id=\"dropdown-equation\" class=\"new-dropdown-option\">Equation</p>" +
-        "<p id=\"dropdown-parametric\" class=\"new-dropdown-option\">Parametric</p>" +
-    "</div>");
+	var dropdown = $(`<div id="new-dropdown">
+        <p id="dropdown-equation" class="new-dropdown-option">Equation</p>
+        <p id="dropdown-parametric" class="new-dropdown-option">Parametric</p>
+		<p id="dropdown-point" class="new-dropdown-option">Point</p>
+    </div>`);
 
 	dropdown.css("top", (e.clientY - $(this).parent().offset().top) + "px");
 	dropdown.css("left", (e.clientX - $(this).parent().offset().left) + "px");
@@ -272,6 +331,11 @@ $("#new-row-button").click(function(e) {
 	$("#dropdown-parametric").click(function() {
 		$("#new-dropdown").remove();
 		createRow("parametric", $("#sidebar").children().length - 2);
+	});
+
+	$("#dropdown-point").click(function() {
+		$("#new-dropdown").remove();
+		createRow("point", $("#sidebar").children().length - 2);
 	});
 });
 
