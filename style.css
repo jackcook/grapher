@@ -103,7 +103,22 @@
 }
 
 #screenshot {
+    background: #3f51b5;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 12px 12px 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     position: absolute;
     top: 32px;
-    right: 32px;
+    left: calc(320px + 32px);
+    transition: all 0.25s ease;
+}
+
+#screenshot:hover {
+    background: #5c6bc0;
+}
+
+#screenshot img {
+    width: 20px;
+    height: 20px;
 }
