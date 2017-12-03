@@ -1,4 +1,4 @@
-var lines = [], meshes = [];
+var lines = {}, meshes = [];
 var camera, controls, scene, renderer;
 
 var MQ = MathQuill.getInterface(2); // for backcompat
@@ -7,7 +7,7 @@ init();
 render();
 function init() {
 	scene = new THREE.Scene();
-	scene.background = new THREE.Color(0xcccccc);
+	scene.background = new THREE.Color(0x9e9e9e);
 	scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
 	renderer = new THREE.WebGLRenderer({
 		preserveDrawingBuffer: true
@@ -74,8 +74,8 @@ function clean(latex) {
 				.replace("\\right", "");
 }
 
-var updateEquation = function(idx, x_latex, y_latex, z_latex) {
-	scene.remove(lines[idx]);
+var updateEquation = function(id, x_latex, y_latex, z_latex) {
+	scene.remove(lines[id]);
 
 	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
 
@@ -121,9 +121,9 @@ var updateEquation = function(idx, x_latex, y_latex, z_latex) {
 		}
 	}
 
-	lines[idx] = new THREE.Line(geometry, material);
+	lines[id] = new THREE.Line(geometry, material);
 
-	scene.add(lines[idx]);
+	scene.add(lines[id]);
 	renderer.render(scene, camera);
 }
 
@@ -141,44 +141,54 @@ function createParametricRow() {
 	"</div>");
 }
 
-function createRow(type, idx) {
+function createRow(type) {
 	if (type == "parametric") {
-		createParametricRow().insertBefore("#new-row-button");
+		var row = createParametricRow();
+
+		var id = "p" + Math.floor(Math.random() * 1000000);
+		row.addClass(id);
+
+		row.insertBefore("#new-row-button");
 
 		var editHandler = function() {
-			var x = MQ.MathField($(".parametric").find(".x")[idx]).latex();
-			var y = MQ.MathField($(".parametric").find(".y")[idx]).latex();
-			var z = MQ.MathField($(".parametric").find(".z")[idx]).latex();
-			updateEquation(idx, x, y, z);
+			var x = MQ.MathField($("." + id).find(".x").get(0)).latex();
+			var y = MQ.MathField($("." + id).find(".y").get(0)).latex();
+			var z = MQ.MathField($("." + id).find(".z").get(0)).latex();
+			updateEquation(id, x, y, z);
 		};
 
-		var xField = MQ.MathField($(".parametric").find(".x")[idx], {
+		var xField = MQ.MathField($("." + id).find(".x").get(0), {
 		  	spaceBehavesLikeTab: true, // configurable
 		  	handlers: {
 		    	edit: editHandler
 		  	}
 		});
 
-		var yField = MQ.MathField($(".parametric").find(".y")[idx], {
+		var yField = MQ.MathField($("." + id).find(".y").get(0), {
 		  	spaceBehavesLikeTab: true, // configurable
 		  	handlers: {
 		    	edit: editHandler
 		  	}
 		});
 
-		var zField = MQ.MathField($(".parametric").find(".z")[idx], {
+		var zField = MQ.MathField($("." + id).find(".z").get(0), {
 		  	spaceBehavesLikeTab: true, // configurable
 		  	handlers: {
 		    	edit: editHandler
 		  	}
 		});
 	} else if (type == "equation") {
-		createEquationRow().insertBefore("#new-row-button");
+		var row = createEquationRow();
+
+		var id = "p" + Math.floor(Math.random() * 1000000);
+		row.addClass(id);
+
+		row.insertBefore("#new-row-button");
 
 		var editHandler = function() {
-			scene.remove(meshes[idx]);
+			scene.remove(meshes[id]);
 
-			var z_latex = MQ.MathField(document.getElementsByClassName("eqn")[0]).latex();
+			var z_latex = MQ.MathField($("." + id).find(".eqn").get(0)).latex();
 
 			function radialWave(u, v) {
 				var x = 4 * (u - 0.5);
@@ -205,12 +215,12 @@ function createRow(type, idx) {
 				return plane;
 			}
 
-			meshes[idx] = createMesh(new THREE.ParametricGeometry(radialWave, 20, 20));
-			scene.add(meshes[idx]);
+			meshes[id] = createMesh(new THREE.ParametricGeometry(radialWave, 20, 20));
+			scene.add(meshes[id]);
 			renderer.render(scene, camera);
 		};
 
-		var eqnField = MQ.MathField(document.getElementsByClassName("eqn")[0], {
+		var eqnField = MQ.MathField($("." + id).find(".eqn").get(0), {
 			spaceBehavesLikeTab: true,
 			handlers: {
 				edit: editHandler
@@ -246,9 +256,5 @@ $("#new-row-button").click(function(e) {
 });
 
 $("#screenshot").click(function(e) {
-	var dataUrl = renderer.domElement.toDataURL("image/png");
-	window.open(dataUrl);
-
-	// var data = canvas.toDataURL("image/png");
-	// window.open(data);
+	window.open(renderer.domElement.toDataURL("image/png"));
 });
