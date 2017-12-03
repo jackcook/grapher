@@ -11,7 +11,7 @@
 //
 //    Orbit - left mouse / touch: one finger move
 //    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
-//    Pan - right mouse, or arrow keys / touch: three finger swipe
+//    Pan - right mouse / touch: three finger swipe
 
 THREE.OrbitControls = function ( object, domElement ) {
 
@@ -43,11 +43,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 	this.minAzimuthAngle = - Infinity; // radians
 	this.maxAzimuthAngle = Infinity; // radians
 
-	// Set to true to enable damping (inertia)
-	// If damping is enabled, you must call controls.update() in your animation loop
-	this.enableDamping = false;
-	this.dampingFactor = 0.25;
-
 	// This option actually enables dollying in and out; left as "zoom" for backwards compatibility.
 	// Set to false to disable zooming
 	this.enableZoom = true;
@@ -60,17 +55,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 	// Set to false to disable panning
 	this.enablePan = true;
 	this.keyPanSpeed = 7.0;	// pixels moved per arrow key push
-
-	// Set to true to automatically rotate around the target
-	// If auto-rotate is enabled, you must call controls.update() in your animation loop
-	this.autoRotate = false;
-	this.autoRotateSpeed = 2.0; // 30 seconds per round when fps is 60
-
-	// Set to false to disable use of the keys
-	this.enableKeys = false;
-
-	// The four arrow keys
-	this.keys = { LEFT: 37, UP: 38, RIGHT: 39, BOTTOM: 40 };
 
 	// Mouse buttons
 	this.mouseButtons = { ORBIT: THREE.MOUSE.LEFT, ZOOM: THREE.MOUSE.MIDDLE, PAN: THREE.MOUSE.RIGHT };
@@ -143,12 +127,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 			// angle from z-axis around y-axis
 			spherical.setFromVector3( offset );
 
-			if ( scope.autoRotate && state === STATE.NONE ) {
-
-				rotateLeft( getAutoRotationAngle() );
-
-			}
-
 			spherical.theta += sphericalDelta.theta;
 			spherical.phi += sphericalDelta.phi;
 
@@ -178,16 +156,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			scope.object.lookAt( scope.target );
 
-			if ( scope.enableDamping === true ) {
-
-				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
-				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
-
-			} else {
-
-				sphericalDelta.set( 0, 0, 0 );
-
-			}
+			sphericalDelta.set( 0, 0, 0 );
 
 			scale = 1;
 			panOffset.set( 0, 0, 0 );
@@ -229,10 +198,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 		document.removeEventListener( 'mousemove', onMouseMove, false );
 		document.removeEventListener( 'mouseup', onMouseUp, false );
 
-		window.removeEventListener( 'keydown', onKeyDown, false );
-
-		//scope.dispatchEvent( { type: 'dispose' } ); // should this be added here?
-
 	};
 
 	//
@@ -270,12 +235,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 	var dollyStart = new THREE.Vector2();
 	var dollyEnd = new THREE.Vector2();
 	var dollyDelta = new THREE.Vector2();
-
-	function getAutoRotationAngle() {
-
-		return 2 * Math.PI / 60 / 60 * scope.autoRotateSpeed;
-
-	}
 
 	function getZoomScale() {
 
@@ -521,36 +480,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	}
 
-	function handleKeyDown( event ) {
-
-		//console.log( 'handleKeyDown' );
-
-		switch ( event.keyCode ) {
-
-			case scope.keys.UP:
-				pan( 0, scope.keyPanSpeed );
-				scope.update();
-				break;
-
-			case scope.keys.BOTTOM:
-				pan( 0, - scope.keyPanSpeed );
-				scope.update();
-				break;
-
-			case scope.keys.LEFT:
-				pan( scope.keyPanSpeed, 0 );
-				scope.update();
-				break;
-
-			case scope.keys.RIGHT:
-				pan( - scope.keyPanSpeed, 0 );
-				scope.update();
-				break;
-
-		}
-
-	}
-
 	function handleTouchStartRotate( event ) {
 
 		//console.log( 'handleTouchStartRotate' );
@@ -772,14 +701,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	}
 
-	function onKeyDown( event ) {
-
-		if ( scope.enabled === false || scope.enableKeys === false || scope.enablePan === false ) return;
-
-		handleKeyDown( event );
-
-	}
-
 	function onTouchStart( event ) {
 
 		if ( scope.enabled === false ) return;
@@ -905,8 +826,6 @@ THREE.OrbitControls = function ( object, domElement ) {
 	scope.domElement.addEventListener( 'touchend', onTouchEnd, false );
 	scope.domElement.addEventListener( 'touchmove', onTouchMove, false );
 
-	window.addEventListener( 'keydown', onKeyDown, false );
-
 	// force an update at start
 
 	this.update();
@@ -915,128 +834,3 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 THREE.OrbitControls.prototype = Object.create( THREE.EventDispatcher.prototype );
 THREE.OrbitControls.prototype.constructor = THREE.OrbitControls;
-
-Object.defineProperties( THREE.OrbitControls.prototype, {
-
-	center: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .center has been renamed to .target' );
-			return this.target;
-
-		}
-
-	},
-
-	// backward compatibility
-
-	noZoom: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
-			return ! this.enableZoom;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noZoom has been deprecated. Use .enableZoom instead.' );
-			this.enableZoom = ! value;
-
-		}
-
-	},
-
-	noRotate: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.' );
-			return ! this.enableRotate;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noRotate has been deprecated. Use .enableRotate instead.' );
-			this.enableRotate = ! value;
-
-		}
-
-	},
-
-	noPan: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.' );
-			return ! this.enablePan;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noPan has been deprecated. Use .enablePan instead.' );
-			this.enablePan = ! value;
-
-		}
-
-	},
-
-	noKeys: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.' );
-			return ! this.enableKeys;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .noKeys has been deprecated. Use .enableKeys instead.' );
-			this.enableKeys = ! value;
-
-		}
-
-	},
-
-	staticMoving: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.' );
-			return ! this.enableDamping;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .staticMoving has been deprecated. Use .enableDamping instead.' );
-			this.enableDamping = ! value;
-
-		}
-
-	},
-
-	dynamicDampingFactor: {
-
-		get: function () {
-
-			console.warn( 'THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.' );
-			return this.dampingFactor;
-
-		},
-
-		set: function ( value ) {
-
-			console.warn( 'THREE.OrbitControls: .dynamicDampingFactor has been renamed. Use .dampingFactor instead.' );
-			this.dampingFactor = value;
-
-		}
-
-	}
-
-} );
