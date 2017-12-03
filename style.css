@@ -61,3 +61,19 @@
 #new-row-button span {
     line-height: 36px;
 }
+
+#new-dropdown {
+    cursor: pointer;
+    position: absolute;
+    background: #fff;
+    box-shadow: 0 0 5px gray;
+}
+
+.new-dropdown-option {
+    padding: 12px;
+    transition: all 0.25s ease;
+}
+
+.new-dropdown-option:hover {
+    background: #ecf0f1;
+}

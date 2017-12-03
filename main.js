@@ -1,5 +1,8 @@
-var lines = [], mesh;
+var lines = [], meshes = [];
 var camera, controls, scene, renderer;
+
+var MQ = MathQuill.getInterface(2); // for backcompat
+
 init();
 render();
 function init() {
@@ -12,7 +15,9 @@ function init() {
 	var container = document.getElementById( 'container' );
 	container.appendChild( renderer.domElement );
 	camera = new THREE.PerspectiveCamera(60, (window.innerWidth - 320) / window.innerHeight, 1, 1000);
-	camera.position.z = 10;
+	camera.position.x = 5;
+	camera.position.y = 2;
+	camera.position.z = 5;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.addEventListener('change', render); // remove when using animation loop
 	controls.enableZoom = false;
@@ -44,7 +49,7 @@ function init() {
 	var light = new THREE.DirectionalLight( 0xffffff );
 	light.position.set(1, 1, 1);
 	scene.add(light);
-	var light = new THREE.DirectionalLight( 0x002288 );
+	var light = new THREE.DirectionalLight( 0xffffff );
 	light.position.set(-1, -1, -1);
 	scene.add(light);
 	var light = new THREE.AmbientLight( 0x222222 );
@@ -111,7 +116,7 @@ var updateEquation = function(idx, x_latex, y_latex, z_latex) {
 			break;
 		}
 
-		if (x_val < 5 && x_val > -5 && y_val < 5 && y_val > -5 && z_val < 5 && z_val > -5) {
+		if (x_val < 10 && x_val > -10 && y_val < 10 && y_val > -10 && z_val < 10 && z_val > -10) {
 			geometry.vertices.push(new THREE.Vector3(x_val, z_val, y_val));
 		}
 	}
@@ -122,88 +127,120 @@ var updateEquation = function(idx, x_latex, y_latex, z_latex) {
 	renderer.render(scene, camera);
 }
 
-var rows = [];
+function createEquationRow() {
+	return $("<div class=\"row equation\">" +
+		"<label>z = </label><span class=\"eqn\"></span>" +
+		"</div>");
+}
 
 function createParametricRow() {
-	return $("<div class=\"row\">" +
-		"<label for=\"x\">x = </label><span class=\"entry x\"></span><br>" +
-		"<label for=\"y\">y = </label><span class=\"entry y\"></span><br>" +
-		"<label for=\"z\">z = </label><span class=\"entry z\"></span>" +
-	"</div>")
+	return $("<div class=\"row parametric\">" +
+		"<label>x = </label><span class=\"x\"></span><br>" +
+		"<label>y = </label><span class=\"y\"></span><br>" +
+		"<label>z = </label><span class=\"z\"></span>" +
+	"</div>");
 }
 
-function createRow() {
-	createParametricRow().insertBefore("#new-row-button");
-}
+function createRow(type, idx) {
+	if (type == "parametric") {
+		createParametricRow().insertBefore("#new-row-button");
 
-function initializeRow(idx) {
-	var row = rows[idx];
+		var editHandler = function() {
+			var x = MQ.MathField($(".parametric").find(".x")[idx]).latex();
+			var y = MQ.MathField($(".parametric").find(".y")[idx]).latex();
+			var z = MQ.MathField($(".parametric").find(".z")[idx]).latex();
+			updateEquation(idx, x, y, z);
+		};
 
-	var editHandler = function() {
-		var x = MQ.MathField($(".x")[idx]).latex();
-		var y = MQ.MathField($(".y")[idx]).latex();
-		var z = MQ.MathField($(".z")[idx]).latex();
-		updateEquation(idx, x, y, z);
-	};
+		var xField = MQ.MathField($(".parametric").find(".x")[idx], {
+		  	spaceBehavesLikeTab: true, // configurable
+		  	handlers: {
+		    	edit: editHandler
+		  	}
+		});
 
-	var MQ = MathQuill.getInterface(2); // for backcompat
-	var xField = MQ.MathField($(".x")[idx], {
-	  	spaceBehavesLikeTab: true, // configurable
-	  	handlers: {
-	    	edit: editHandler
-	  	}
-	});
+		var yField = MQ.MathField($(".parametric").find(".y")[idx], {
+		  	spaceBehavesLikeTab: true, // configurable
+		  	handlers: {
+		    	edit: editHandler
+		  	}
+		});
 
-	var yField = MQ.MathField($(".y")[idx], {
-	  	spaceBehavesLikeTab: true, // configurable
-	  	handlers: {
-	    	edit: editHandler
-	  	}
-	});
+		var zField = MQ.MathField($(".parametric").find(".z")[idx], {
+		  	spaceBehavesLikeTab: true, // configurable
+		  	handlers: {
+		    	edit: editHandler
+		  	}
+		});
+	} else if (type == "equation") {
+		createEquationRow().insertBefore("#new-row-button");
 
-	var zField = MQ.MathField($(".z")[idx], {
-	  	spaceBehavesLikeTab: true, // configurable
-	  	handlers: {
-	    	edit: editHandler
-	  	}
-	});
-}
+		var editHandler = function() {
+			scene.remove(meshes[idx]);
 
-createRow();
-initializeRow(0);
+			var z_latex = MQ.MathField(document.getElementsByClassName("eqn")[0]).latex();
 
-$("#new-row-button").click(function() {
-	createRow();
-	initializeRow($("#sidebar").children().length - 3);
-});
-
-var eqnField = MQ.MathField(document.getElementById("eq"), {
-	spaceBehavesLikeTab: true,
-	handlers: {
-		edit: function() {
 			function radialWave(u, v) {
 				var x = 5 * (u - 0.5);
 				var z = 5 * (v - 0.5);
-				var y = Math.pow(x, 2) + Math.pow(z, 2);
-				// var y = Math.pow(z, 2) - Math.pow(x, 2);
-	            return new THREE.Vector3(x, y, z);
-	        }
+				var y = 0;
+
+				try {
+					y = Evaluatex.evaluate(clean(z_latex), {x: x, y: z}, {latex: true});
+				} catch (err) {
+					return null;
+				}
+
+				return new THREE.Vector3(x, y, z);
+			}
 
 			function createMesh(geom) {
-	            var meshMaterial = new THREE.MeshPhongMaterial({
-	                specular: 0xaaaafff,
-	                color: 0x3399ff,
-	                shininess: 40,
-	                metal: true
-	            });
-	            meshMaterial.side = THREE.DoubleSide;
-	            // create a multimaterial
-	            var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
-	            return plane;
-	        }
+				var meshMaterial = new THREE.MeshPhongMaterial({
+					color: 0x3f51b5,
+					shininess: 4
+				});
+				meshMaterial.side = THREE.DoubleSide;
+				// create a multimaterial
+				var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
+				return plane;
+			}
 
-		var mesh = createMesh(new THREE.ParametricGeometry(radialWave, 120, 120, false));
-        scene.add(mesh);
-		}
+			meshes[idx] = createMesh(new THREE.ParametricGeometry(radialWave, 120, 120, false));
+			scene.add(meshes[idx]);
+			renderer.render(scene, camera);
+		};
+
+		var eqnField = MQ.MathField(document.getElementsByClassName("eqn")[0], {
+			spaceBehavesLikeTab: true,
+			handlers: {
+				edit: editHandler
+			}
+		});
 	}
+}
+
+createRow("parametric", 0);
+
+$("#new-row-button").click(function(e) {
+	$("#new-dropdown").remove();
+
+	var dropdown = $("<div id=\"new-dropdown\">" +
+        "<p id=\"dropdown-equation\" class=\"new-dropdown-option\">Equation</p>" +
+        "<p id=\"dropdown-parametric\" class=\"new-dropdown-option\">Parametric</p>" +
+    "</div>");
+
+	dropdown.css("top", (e.clientY - $(this).parent().offset().top) + "px");
+	dropdown.css("left", (e.clientX - $(this).parent().offset().left) + "px");
+
+	$("body").append(dropdown);
+
+	$("#dropdown-equation").click(function() {
+		$("#new-dropdown").remove();
+		createRow("equation", $("#sidebar").children().length - 2);
+	});
+
+	$("#dropdown-parametric").click(function() {
+		$("#new-dropdown").remove();
+		createRow("parametric", $("#sidebar").children().length - 2);
+	});
 });
