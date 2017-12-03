@@ -11,6 +11,7 @@
     left: 0;
     top: 0;
     bottom: 0;
+    overflow-y: auto;
 }
 
 #logo {
@@ -27,6 +28,7 @@
 }
 
 #container {
+    overflow: hidden;
     position: absolute;
     top: 0;
     right: 0;
@@ -76,4 +78,10 @@
 
 .new-dropdown-option:hover {
     background: #ecf0f1;
+}
+
+#screenshot {
+    position: absolute;
+    top: 32px;
+    right: 32px;
 }

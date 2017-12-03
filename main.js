@@ -9,7 +9,9 @@ function init() {
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color(0xcccccc);
 	scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({
+		preserveDrawingBuffer: true
+	});
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth - 320, window.innerHeight );
 	var container = document.getElementById( 'container' );
@@ -20,7 +22,6 @@ function init() {
 	camera.position.z = 5;
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.addEventListener('change', render); // remove when using animation loop
-	controls.enableZoom = false;
 	// world
 	var xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
 	var xGeometry = new THREE.Geometry();
@@ -74,7 +75,6 @@ function clean(latex) {
 }
 
 var updateEquation = function(idx, x_latex, y_latex, z_latex) {
-	// scene.remove(line);
 	scene.remove(lines[idx]);
 
 	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
@@ -243,4 +243,12 @@ $("#new-row-button").click(function(e) {
 		$("#new-dropdown").remove();
 		createRow("parametric", $("#sidebar").children().length - 2);
 	});
+});
+
+$("#screenshot").click(function(e) {
+	var dataUrl = renderer.domElement.toDataURL("image/png");
+	window.open(dataUrl);
+
+	// var data = canvas.toDataURL("image/png");
+	// window.open(data);
 });
