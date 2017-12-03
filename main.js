@@ -143,7 +143,7 @@ function initializeRow(idx) {
 		var x = MQ.MathField($(".x")[idx]).latex();
 		var y = MQ.MathField($(".y")[idx]).latex();
 		var z = MQ.MathField($(".z")[idx]).latex();
-		updateEquation(0, x, y, z);
+		updateEquation(idx, x, y, z);
 	};
 
 	var MQ = MathQuill.getInterface(2); // for backcompat
