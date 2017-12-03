@@ -48,10 +48,10 @@ function init() {
 
 	// lights
 	var light = new THREE.DirectionalLight( 0xffffff );
-	light.position.set(1, 1, 1);
+	light.position.set(-1, 1, 1);
 	scene.add(light);
 	var light = new THREE.DirectionalLight( 0xffffff );
-	light.position.set(-1, -1, -1);
+	light.position.set(1, -1, -1);
 	scene.add(light);
 	var light = new THREE.AmbientLight( 0x222222 );
 	scene.add(light);
@@ -129,7 +129,7 @@ var updateEquation = function(id, x_latex, y_latex, z_latex) {
 
 function createEquationRow() {
 	return $(`<div class="row equation">
-		<label>z = </label><span class="eqn"></span>
+		<span class="eqn">z=</span>
 		<img class="delete" src="close.svg" />
 	</div>`);
 }
@@ -206,34 +206,51 @@ function createRow(type) {
 		var editHandler = function() {
 			scene.remove(items[id]);
 
-			var z_latex = MQ.MathField($("." + id).find(".eqn").get(0)).latex();
+			var z_latex = clean(MQ.MathField($("." + id).find(".eqn").get(0)).latex());
 
-			function radialWave(u, v) {
-				var x = 4 * (u - 0.5);
-				var z = 4 * (v - 0.5);
-				var y;
+			function custom(u, v) {
+				var leftSide = z_latex.split("=")[0];
 
-				try {
-					y = Evaluatex.evaluate(clean(z_latex), {x: x, y: z}, {latex: true});
-				} catch (err) {
-					y = 0;
+				u = 4 * (u - 0.5);
+				v = 4 * (v - 0.5);
+				var w;
+				var variables;
+
+				if (leftSide == "x") {
+					variables = {y: u, z: v};
+				} else if (leftSide == "y") {
+					variables = {z: u, x: v};
+				} else if (leftSide == "z") {
+					variables = {x: u, y: v};
 				}
 
-				return new THREE.Vector3(x, y, z);
+				try {
+					w = Evaluatex.evaluate(z_latex.split("=")[1], variables, {latex: true});
+				} catch (err) {
+					w = 0;
+				}
+
+				if (leftSide == "x") {
+					return new THREE.Vector3(w, v, u);
+				} else if (leftSide == "y") {
+					return new THREE.Vector3(v, u, w);
+				} else if (leftSide == "z") {
+					return new THREE.Vector3(u, w, v);
+				}
 			}
 
 			function createMesh(geom) {
-				var meshMaterial = new THREE.MeshPhongMaterial({
+				var material = new THREE.MeshPhongMaterial({
 					color: 0x3f51b5,
-					shininess: 4
+					shininess: 4,
+					side: THREE.DoubleSide
 				});
-				meshMaterial.side = THREE.DoubleSide;
-				// create a multimaterial
-				var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
+
+				var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [material]);
 				return plane;
 			}
 
-			items[id] = createMesh(new THREE.ParametricGeometry(radialWave, 20, 20));
+			items[id] = createMesh(new THREE.ParametricGeometry(custom, 20, 20));
 			scene.add(items[id]);
 			renderer.render(scene, camera);
 		};
