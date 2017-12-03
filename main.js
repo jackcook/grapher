@@ -172,6 +172,11 @@ function initializeRow(idx) {
 createRow();
 initializeRow(0);
 
+$("#new-row-button").click(function() {
+	createRow();
+	initializeRow($("#sidebar").children().length - 3);
+});
+
 var eqnField = MQ.MathField(document.getElementById("eq"), {
 	spaceBehavesLikeTab: true,
 	handlers: {
