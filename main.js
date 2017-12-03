@@ -181,14 +181,14 @@ function createRow(type, idx) {
 			var z_latex = MQ.MathField(document.getElementsByClassName("eqn")[0]).latex();
 
 			function radialWave(u, v) {
-				var x = 5 * (u - 0.5);
-				var z = 5 * (v - 0.5);
-				var y = 0;
+				var x = 4 * (u - 0.5);
+				var z = 4 * (v - 0.5);
+				var y;
 
 				try {
 					y = Evaluatex.evaluate(clean(z_latex), {x: x, y: z}, {latex: true});
 				} catch (err) {
-					return null;
+					y = 0;
 				}
 
 				return new THREE.Vector3(x, y, z);
@@ -205,7 +205,7 @@ function createRow(type, idx) {
 				return plane;
 			}
 
-			meshes[idx] = createMesh(new THREE.ParametricGeometry(radialWave, 120, 120, false));
+			meshes[idx] = createMesh(new THREE.ParametricGeometry(radialWave, 20, 20));
 			scene.add(meshes[idx]);
 			renderer.render(scene, camera);
 		};
