@@ -1,4 +1,4 @@
-var lines = {}, meshes = [];
+var items = {};
 var camera, controls, scene, renderer;
 
 var MQ = MathQuill.getInterface(2); // for backcompat
@@ -75,7 +75,7 @@ function clean(latex) {
 }
 
 var updateEquation = function(id, x_latex, y_latex, z_latex) {
-	scene.remove(lines[id]);
+	scene.remove(items[id]);
 
 	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
 
@@ -121,24 +121,26 @@ var updateEquation = function(id, x_latex, y_latex, z_latex) {
 		}
 	}
 
-	lines[id] = new THREE.Line(geometry, material);
+	items[id] = new THREE.Line(geometry, material);
 
-	scene.add(lines[id]);
+	scene.add(items[id]);
 	renderer.render(scene, camera);
 }
 
 function createEquationRow() {
-	return $("<div class=\"row equation\">" +
-		"<label>z = </label><span class=\"eqn\"></span>" +
-		"</div>");
+	return $(`<div class="row equation">
+		<label>z = </label><span class="eqn"></span>
+		<img class="delete" src="close.svg" />
+		</div>`);
 }
 
 function createParametricRow() {
-	return $("<div class=\"row parametric\">" +
-		"<label>x = </label><span class=\"x\"></span><br>" +
-		"<label>y = </label><span class=\"y\"></span><br>" +
-		"<label>z = </label><span class=\"z\"></span>" +
-	"</div>");
+	return $(`<div class="row parametric">
+		<label>x = </label><span class="x"></span><br>
+		<label>y = </label><span class="y"></span><br>
+		<label>z = </label><span class="z"></span>
+		<img class="delete" src="close.svg" />
+		</div>`);
 }
 
 function createRow(type) {
@@ -177,6 +179,15 @@ function createRow(type) {
 		    	edit: editHandler
 		  	}
 		});
+
+		var deleteHandler = function() {
+			$("." + id).remove();
+
+			scene.remove(items[id]);
+			renderer.render(scene, camera);
+		};
+
+		$("." + id + " .delete").click(deleteHandler);
 	} else if (type == "equation") {
 		var row = createEquationRow();
 
@@ -186,7 +197,7 @@ function createRow(type) {
 		row.insertBefore("#new-row-button");
 
 		var editHandler = function() {
-			scene.remove(meshes[id]);
+			scene.remove(items[id]);
 
 			var z_latex = MQ.MathField($("." + id).find(".eqn").get(0)).latex();
 
@@ -215,8 +226,8 @@ function createRow(type) {
 				return plane;
 			}
 
-			meshes[id] = createMesh(new THREE.ParametricGeometry(radialWave, 20, 20));
-			scene.add(meshes[id]);
+			items[id] = createMesh(new THREE.ParametricGeometry(radialWave, 20, 20));
+			scene.add(items[id]);
 			renderer.render(scene, camera);
 		};
 
@@ -226,6 +237,15 @@ function createRow(type) {
 				edit: editHandler
 			}
 		});
+
+		var deleteHandler = function() {
+			$("." + id).remove();
+
+			scene.remove(items[id]);
+			renderer.render(scene, camera);
+		};
+
+		$("." + id + " .delete").click(deleteHandler);
 	}
 }
 
