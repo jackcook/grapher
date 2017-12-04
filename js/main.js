@@ -142,7 +142,7 @@ var updateEquation = function(id, x_latex, y_latex, z_latex) {
 function createEquationRow() {
 	return $(`<div class="row equation">
 		<span class="eqn">z=</span>
-		<img class="delete" src="close.svg" />
+		<img class="delete" src="./icons/close.svg" />
 		<a class="color-picker"></a>
 	</div>`);
 }
@@ -152,7 +152,7 @@ function createParametricRow() {
 		<label>x = </label><span class="x"></span><br>
 		<label>y = </label><span class="y"></span><br>
 		<label>z = </label><span class="z"></span>
-		<img class="delete" src="close.svg" />
+		<img class="delete" src="./icons/close.svg" />
 		<a class="color-picker"></a>
 	</div>`);
 }
@@ -160,7 +160,8 @@ function createParametricRow() {
 function createPointRow() {
 	return $(`<div class="row point">
 		<span class="coordinates">(0,0,0)</span>
-		<img class="delete" src="close.svg" />
+		<img class="delete" src="./icons/close.svg" />
+		<a class="color-picker"></a>
 	</div>`)
 }
 
@@ -294,6 +295,8 @@ function createRow(type) {
 		var id = "p" + Math.floor(Math.random() * 1000000);
 		row.addClass(id);
 
+		colors[id] = 0x009688;
+
 		row.insertBefore("#new-row-button");
 
 		var editHandler = function() {
@@ -309,7 +312,7 @@ function createRow(type) {
 
 				var geometry = new THREE.SphereGeometry(0.1, 32, 32);
 				var material = new THREE.MeshPhongMaterial({
-					color: 0x3f51b5,
+					color: colors[id],
 					shininess: 4
 				});
 
