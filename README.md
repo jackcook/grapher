@@ -9,7 +9,7 @@ I'm currently working on a 3D grapher to gain experience with web development an
 ## Features
 
 - [x] Graph curves parametrically
-- [x] Graph surfaces in terms of one variable
+- [x] Graph surfaces in terms of two variables
 - [x] Plot points in 3-space
 - [x] Set custom colors in your graphs
 - [x] Save a picture of what you've graphed
