@@ -1,4 +1,4 @@
-var items = {};
+var items = {}, colors = {};
 var camera, controls, scene, renderer;
 
 var MQ = MathQuill.getInterface(2); // for backcompat
@@ -77,7 +77,10 @@ function clean(latex) {
 var updateEquation = function(id, x_latex, y_latex, z_latex) {
 	scene.remove(items[id]);
 
-	var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+	var material = new THREE.LineBasicMaterial({
+		color: colors[id],
+		linewidth: 13
+	});
 
 	function x(t) {
 		try {
@@ -131,6 +134,7 @@ function createEquationRow() {
 	return $(`<div class="row equation">
 		<span class="eqn">z=</span>
 		<img class="delete" src="close.svg" />
+		<a class="color-picker"></a>
 	</div>`);
 }
 
@@ -140,6 +144,7 @@ function createParametricRow() {
 		<label>y = </label><span class="y"></span><br>
 		<label>z = </label><span class="z"></span>
 		<img class="delete" src="close.svg" />
+		<a class="color-picker"></a>
 	</div>`);
 }
 
@@ -156,6 +161,8 @@ function createRow(type) {
 
 		var id = "p" + Math.floor(Math.random() * 1000000);
 		row.addClass(id);
+
+		colors[id] = 0x009688;
 
 		row.insertBefore("#new-row-button");
 
@@ -201,6 +208,8 @@ function createRow(type) {
 		var id = "p" + Math.floor(Math.random() * 1000000);
 		row.addClass(id);
 
+		colors[id] = 0x009688;
+
 		row.insertBefore("#new-row-button");
 
 		var editHandler = function() {
@@ -241,7 +250,7 @@ function createRow(type) {
 
 			function createMesh(geom) {
 				var material = new THREE.MeshPhongMaterial({
-					color: 0x3f51b5,
+					color: colors[id],
 					shininess: 4,
 					side: THREE.DoubleSide
 				});
@@ -322,6 +331,54 @@ function createRow(type) {
 
 		$("." + id + " .delete").click(deleteHandler);
 	}
+
+	$(".color-picker").click(function(e) {
+		var picker = $(`<div id="color-picker">
+			<a class="red color" hex="#f44336"></a>
+			<a class="pink color" hex="#e91e63"></a>
+			<a class="purple color" hex="#9c27b0"></a>
+			<a class="deep-purple color" hex="#673ab7"></a>
+			<a class="indigo color" hex="#3f51b5"></a>
+			<a class="blue color" hex="#2196f3"></a>
+			<a class="cyan color" hex="#00bcd4"></a>
+			<a class="teal color" hex="#009688"></a>
+			<a class="green color" hex="#4caf50"></a>
+			<a class="light-green color" hex="#8bc34a"></a>
+			<a class="lime color" hex="#cddc39"></a>
+			<a class="yellow color" hex="#ffeb3b"></a>
+			<a class="amber color" hex="#ffc107"></a>
+			<a class="orange color" hex="#ff9800"></a>
+			<a class="deep-orange color" hex="#ff5722"></a>
+			<a class="brown color" hex="#795548"></a>
+		</div>`);
+
+		var id = $(this).parent().attr("class").split(" ")[2];
+
+		picker.attr("row", id);
+		picker.css("top", e.clientY + "px");
+		picker.css("left", e.clientX + "px");
+
+		$("body").append(picker);
+
+		var colorBox = $(this);
+
+		var clickHandler = function(e) {
+			if (id in items) {
+				try {
+					items[id].material.color = new THREE.Color($(this).attr("hex"));
+				} catch (err) {
+					items[id].children[0].material.color = new THREE.Color($(this).attr("hex"));
+				}
+			}
+
+			colors[id] = $(this).attr("hex");
+			colorBox.css("background", $(this).attr("hex"));
+			renderer.render(scene, camera);
+			$("#color-picker").remove();
+		};
+
+		$(".color").click(clickHandler);
+	});
 }
 
 createRow("parametric", 0);

@@ -46,6 +46,12 @@
     position: relative;
 }
 
+.equation, .point {
+    min-height: 80px;
+    line-height: 44px;
+    box-sizing: border-box;
+}
+
 .row .delete {
     opacity: 0;
     position: absolute;
@@ -57,8 +63,101 @@
     transition: all 0.1s ease;
 }
 
-.row:hover .delete {
+.row:hover .delete, .row:hover .color-picker {
     opacity: 1;
+}
+
+.row .color-picker {
+    opacity: 0;
+    display: block;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    bottom: 12px;
+    right: 12px;
+    cursor: pointer;
+    background: #009688;
+    transition: all 0.1s ease;
+}
+
+#color-picker {
+    background: #fff;
+    box-shadow: 0 0 5px gray;
+    position: absolute;
+    max-width: 172px;
+    padding: 4px;
+}
+
+#color-picker .color {
+    display: inline-block;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    margin: 4px;
+}
+
+#color-picker .red {
+    background: #f44336;
+}
+
+#color-picker .pink {
+    background: #e91e63;
+}
+
+#color-picker .purple {
+    background: #9c27b0;
+}
+
+#color-picker .deep-purple {
+    background: #673ab7;
+}
+
+#color-picker .indigo {
+    background: #3f51b5;
+}
+
+#color-picker .blue {
+    background: #2196f3;
+}
+
+#color-picker .cyan {
+    background: #00bcd4;
+}
+
+#color-picker .teal {
+    background: #009688;
+}
+
+#color-picker .green {
+    background: #4caf50;
+}
+
+#color-picker .light-green {
+    background: #8bc34a;
+}
+
+#color-picker .lime {
+    background: #cddc39;
+}
+
+#color-picker .yellow {
+    background: #ffeb3b;
+}
+
+#color-picker .amber {
+    background: #ffc107;
+}
+
+#color-picker .orange {
+    background: #ff9800;
+}
+
+#color-picker .deep-orange {
+    background: #ff5722;
+}
+
+#color-picker .brown {
+    background: #795548;
 }
 
 .mq-editable-field {
