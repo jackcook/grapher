@@ -23,7 +23,7 @@ function init() {
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.addEventListener('change', render); // remove when using animation loop
 	// world
-	var xMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+	var xMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
 	var xGeometry = new THREE.Geometry();
 	xGeometry.vertices.push(new THREE.Vector3(-1000, 0, 0));
 	xGeometry.vertices.push(new THREE.Vector3(1000, 0, 0));
@@ -37,12 +37,36 @@ function init() {
 	var yLine = new THREE.Line(yGeometry, yMaterial);
 	scene.add(yLine);
 
-	var zMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+	var zMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
 	var zGeometry = new THREE.Geometry();
 	zGeometry.vertices.push(new THREE.Vector3(0, 0, -1000));
-	zGeometry.vertices.push(new THREE.Vector3(0, 0, 1000));
+	zGeometry.vertices.push(new THREE.Vector3(0, 0, -3));
 	var zLine = new THREE.Line(zGeometry, zMaterial);
 	scene.add(zLine);
+
+	var zGeometryTwo = new THREE.Geometry();
+	zGeometryTwo.vertices.push(new THREE.Vector3(0, 0, 3));
+	zGeometryTwo.vertices.push(new THREE.Vector3(0, 0, 1000));
+	var zLineTwo = new THREE.Line(zGeometryTwo, zMaterial);
+	scene.add(zLineTwo);
+
+	for (var x = -3; x <= 3; x++) {
+		var xMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+		var xGeometry = new THREE.Geometry();
+		xGeometry.vertices.push(new THREE.Vector3(x, 0, -3));
+		xGeometry.vertices.push(new THREE.Vector3(x, 0, 3));
+		var xLine = new THREE.Line(xGeometry, xMaterial);
+		scene.add(xLine);
+	}
+
+	for (var y = -3; y <= 3; y++) {
+		var yMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
+		var yGeometry = new THREE.Geometry();
+		yGeometry.vertices.push(new THREE.Vector3(-3, 0, y));
+		yGeometry.vertices.push(new THREE.Vector3(3, 0, y));
+		var yLine = new THREE.Line(yGeometry, yMaterial);
+		scene.add(yLine);
+	}
 
 	renderer.render(scene, camera);
 
