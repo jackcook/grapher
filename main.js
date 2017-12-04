@@ -1,92 +1,78 @@
 var items = {}, colors = {};
 var camera, controls, scene, renderer;
 
-var MQ = MathQuill.getInterface(2); // for backcompat
+var MQ = MathQuill.getInterface(2);
 
 init();
 render();
+
 function init() {
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x9e9e9e);
 	scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
+
 	renderer = new THREE.WebGLRenderer({
 		preserveDrawingBuffer: true
 	});
-	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setSize( window.innerWidth - 320, window.innerHeight );
-	var container = document.getElementById( 'container' );
-	container.appendChild( renderer.domElement );
+
+	renderer.setPixelRatio(window.devicePixelRatio);
+	renderer.setSize(window.innerWidth - 320, window.innerHeight);
+
+	$("#container").append(renderer.domElement);
+
 	camera = new THREE.PerspectiveCamera(60, (window.innerWidth - 320) / window.innerHeight, 1, 1000);
 	camera.position.x = -5;
 	camera.position.y = 2;
 	camera.position.z = 5;
+
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
-	controls.addEventListener('change', render); // remove when using animation loop
-	// world
-	var xMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
-	var xGeometry = new THREE.Geometry();
-	xGeometry.vertices.push(new THREE.Vector3(-1000, 0, 0));
-	xGeometry.vertices.push(new THREE.Vector3(1000, 0, 0));
-	var xLine = new THREE.Line(xGeometry, xMaterial);
-	scene.add(xLine);
+	controls.addEventListener("change", render);
 
-	var yMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 });
-	var yGeometry = new THREE.Geometry();
-	yGeometry.vertices.push(new THREE.Vector3(0, -1000, 0));
-	yGeometry.vertices.push(new THREE.Vector3(0, 1000, 0));
-	var yLine = new THREE.Line(yGeometry, yMaterial);
-	scene.add(yLine);
+	function drawLine(p1, p2, color) {
+		var material = new THREE.LineBasicMaterial({
+			color: color
+		});
 
-	var zMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
-	var zGeometry = new THREE.Geometry();
-	zGeometry.vertices.push(new THREE.Vector3(0, 0, -1000));
-	zGeometry.vertices.push(new THREE.Vector3(0, 0, -3));
-	var zLine = new THREE.Line(zGeometry, zMaterial);
-	scene.add(zLine);
+		var geometry = new THREE.Geometry();
+		geometry.vertices.push(p1);
+		geometry.vertices.push(p2);
 
-	var zGeometryTwo = new THREE.Geometry();
-	zGeometryTwo.vertices.push(new THREE.Vector3(0, 0, 3));
-	zGeometryTwo.vertices.push(new THREE.Vector3(0, 0, 1000));
-	var zLineTwo = new THREE.Line(zGeometryTwo, zMaterial);
-	scene.add(zLineTwo);
-
-	for (var x = -3; x <= 3; x++) {
-		var xMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
-		var xGeometry = new THREE.Geometry();
-		xGeometry.vertices.push(new THREE.Vector3(x, 0, -3));
-		xGeometry.vertices.push(new THREE.Vector3(x, 0, 3));
-		var xLine = new THREE.Line(xGeometry, xMaterial);
-		scene.add(xLine);
+		var line = new THREE.Line(geometry, material);
+		scene.add(line);
 	}
 
-	for (var y = -3; y <= 3; y++) {
-		var yMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 3 });
-		var yGeometry = new THREE.Geometry();
-		yGeometry.vertices.push(new THREE.Vector3(-3, 0, y));
-		yGeometry.vertices.push(new THREE.Vector3(3, 0, y));
-		var yLine = new THREE.Line(yGeometry, yMaterial);
-		scene.add(yLine);
+	drawLine(new THREE.Vector3(-1000, 0, 0), new THREE.Vector3(1000, 0, 0), 0x0000ff);
+	drawLine(new THREE.Vector3(0, -1000, 0), new THREE.Vector3(0, 1000, 0), 0x00ff00);
+	drawLine(new THREE.Vector3(0, 0, -1000), new THREE.Vector3(0, 0, -3), 0xff0000);
+	drawLine(new THREE.Vector3(0, 0, 3), new THREE.Vector3(0, 0, 1000), 0xff0000);
+
+	for (var i = -3; i <= 3; i++) {
+		drawLine(new THREE.Vector3(i, 0, -3), new THREE.Vector3(i, 0, 3), 0x0000ff);
+		drawLine(new THREE.Vector3(-3, 0, i), new THREE.Vector3(3, 0, i), 0x0000ff);
 	}
 
 	renderer.render(scene, camera);
 
-	// lights
 	var light = new THREE.DirectionalLight( 0xffffff );
 	light.position.set(-1, 1, 1);
 	scene.add(light);
+
 	var light = new THREE.DirectionalLight( 0xffffff );
 	light.position.set(1, -1, -1);
 	scene.add(light);
+
 	var light = new THREE.AmbientLight( 0x222222 );
 	scene.add(light);
-	//
+
 	window.addEventListener("resize", onWindowResize, false);
 }
+
 function onWindowResize() {
 	camera.aspect = (window.innerWidth - 320) / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth - 320, window.innerHeight );
 }
+
 function render() {
 	renderer.render(scene, camera);
 }
@@ -102,8 +88,7 @@ var updateEquation = function(id, x_latex, y_latex, z_latex) {
 	scene.remove(items[id]);
 
 	var material = new THREE.LineBasicMaterial({
-		color: colors[id],
-		linewidth: 13
+		color: colors[id]
 	});
 
 	function x(t) {
