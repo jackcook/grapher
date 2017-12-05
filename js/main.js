@@ -24,6 +24,10 @@ function init() {
 	camera.position.x = -5;
 	camera.position.y = 2;
 	camera.position.z = 5;
+	scene.add(camera);
+
+	var light = new THREE.PointLight(0xffffff);
+	camera.add(light);
 
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 	controls.addEventListener("change", render);
@@ -52,25 +56,13 @@ function init() {
 	}
 
 	renderer.render(scene, camera);
-
-	var light = new THREE.DirectionalLight( 0xffffff );
-	light.position.set(-1, 1, 1);
-	scene.add(light);
-
-	var light = new THREE.DirectionalLight( 0xffffff );
-	light.position.set(1, -1, -1);
-	scene.add(light);
-
-	var light = new THREE.AmbientLight( 0x222222 );
-	scene.add(light);
-
 	window.addEventListener("resize", onWindowResize, false);
 }
 
 function onWindowResize() {
 	camera.aspect = (window.innerWidth - 320) / window.innerHeight;
 	camera.updateProjectionMatrix();
-	renderer.setSize( window.innerWidth - 320, window.innerHeight );
+	renderer.setSize(window.innerWidth - 320, window.innerHeight);
 }
 
 function render() {
