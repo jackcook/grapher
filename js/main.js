@@ -418,5 +418,12 @@ $("#new-row-button").click(function(e) {
 });
 
 $("#screenshot").click(function(e) {
-	window.open(renderer.domElement.toDataURL("image/png"));
+	renderer.render(scene, camera);
+
+	var screenshot = '<img src="' + renderer.domElement.toDataURL("image/png") + '">';
+	var tab = window.open('about:blank');
+
+	window.setTimeout(() => {
+		tab.document.body.innerHTML += screenshot;
+	}, 1)
 });
